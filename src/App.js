@@ -2,17 +2,32 @@ import React, { Component } from 'react';
 // import React, { setState, useState } from 'react';// these are hooks(setstate, and use state)
 import logo from './logo.svg';
 import './App.css';
+import Radium, {StyleRoot} from 'radium';
+import Person from './Person/Person';
+import styled from 'styled-components'
 
-import Person from './Person/Person'
 
+const StyledButton = styled.button`
+
+  background-color: ${props => props.alt ? 'red' : 'green'};
+  color: white;
+  font: inherit;
+  border: 1px solid blue;
+  padding: 8px;
+  cursor: pointer;
+  text-align: center;
+  &:hover{
+background-color : ${props => props.alt ? 'salmon' : 'lightgreen'};
+color: red;
+`;
 
 //these are statefull/intelegent /container/smart component
 class App extends Component {
   state = {
     persons: [
-      { name: 'max', age: 28 },
-      { name: 'avi', age: 21 },
-      { name: 'nsh', age: 289 },
+      { id: 'bsjaj1', name: 'max', age: 28 },
+      { id: 'bsjaj2', name: 'avi', age: 21 },
+      { id: 'bsjaj3', name: 'nsh', age: 289 },
     ],
     animals: [
       { name: 'max', age: 28 },
@@ -35,13 +50,20 @@ class App extends Component {
     )
   }
   
-  nameChangeHandler = (event) => {
+  nameChangeHandler = (event, id) => {
+    const personIndex = this.state.persons.findIndex(p => p.id === id);
+    const person  = {...this.state.persons[personIndex]};
+
+    //alternative approach to spread operator;
+    //const person  = Object.assign({}, this.state.persons[personIndex]);
+
+
+    person.name=event.target.value;
+    const persons = [...this.state.persons];
+    persons[personIndex] = person;
+
     this.setState({
-      persons: [
-        { name: 'max1', age: 28 },
-        { name: event.target.value, age: 21 },
-        { name: 'max2', age: 280 },
-      ]
+      persons: persons
     })
   }
 
@@ -67,13 +89,18 @@ this.setState({persons: persons})
   render() {
 
     const style = {
-      backgroudColor: 'white',
+      backgroundColor: 'green',
+      color: 'white',
       font: 'inherit',
       border: '1px solid blue',
       padding: '8px',
       cursor: 'pointer',
-      align: 'center'
-
+      textAlign: 'center',
+      ':hover':{
+  backgroundColor : 'lightgreen',
+  color: 'red'
+}
+      
     };
 
 
@@ -82,7 +109,7 @@ let persons = null;
 
 if(this.state.showPersons){
   persons = (
-  
+
   <div>
    {this.state.persons.map((person, index) => {
      return <Person 
@@ -90,26 +117,61 @@ if(this.state.showPersons){
      click={()=> this.deletePersonHandler(index)} 
      name={person.name}
      age ={person.age}
+     key ={person.id}
+     changed={(event) => this.nameChangeHandler(event, person.id)}
      />
    })}
   </div>
 
   );
+style.backgroundColor = 'red';
+style[':hover'] ={
+backgroundColor : 'salmon',
+color: 'black'
+};
+
+}
+//let classes = ['red', 'bold'].join(' '); //static assignment of classes
+
+const classes = [];
+if(this.state.persons.length <=2){
+  classes.push('red'); //classes = ['red']
+}
+if(this.state.persons.length <=1){
+  classes.push('bold'); //classes = ['red','bold']
 }
 
 
     return (
+
+      <StyleRoot>
+
       <div className="App">
         <h1>Hi, this is h tag </h1>
-        <p>this is p tag</p>
+        <p className={classes}>this is p tag</p>
 
         <Person />
+        {/* <StyledButton alt= {this.state.showPersons}
+          key = '1' //this is required if there are multiple lements using radium
+          onClick={this.togglePersonHandler}>Toggle Persons
+          </StyledButton> */}
+          //use styled button if using styled component
+
+
+        <button className="button"
+          key = '1' //this is required if there are multiple lements using radium
+          onClick={this.togglePersonHandler}>Toggle Persons
+          </button>
+
+
         <button
           style={style}
-          onClick={this.togglePersonHandler}>Toggle Persons</button>
-        <button
-          style={style}
-          onClick={this.switchNameHandler.bind(this, 'dhdhsd')} >Switch name</button>
+          key = '2' //this is required if there are multiple lements using radium
+
+          onClick={this.switchNameHandler.bind(this, 'dhdhsd')} >Switch name
+          </button>
+
+
 
         {persons}
       {/* we could have used ternary operator, instaed of moving ther persons div out of return, as we cannot use scoped condition here */}
@@ -133,6 +195,8 @@ if(this.state.showPersons){
 
         
       </div>
+      </StyleRoot>
+
     );
 
     // return React.createElement('div', {className: 'App'}, React.createElement('h1', null,'Hi, I\'m someone'));
@@ -193,4 +257,4 @@ if(this.state.showPersons){
 
 // }
 
-export default App;
+export default Radium(App);
