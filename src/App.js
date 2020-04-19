@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 // import React, { setState, useState } from 'react';// these are hooks(setstate, and use state)
 import logo from './logo.svg';
-import './App.css';
-import Radium, {StyleRoot} from 'radium';
+import classes from './App.css';
+import Radium, { StyleRoot } from 'radium';
 import Person from './Person/Person';
-import styled from 'styled-components'
+import styled from 'styled-components';
+import ErrorBoundary from './ErrorBoundary/ErrorBoundary';
 
 
 const StyledButton = styled.button`
@@ -49,16 +50,16 @@ class App extends Component {
     }
     )
   }
-  
+
   nameChangeHandler = (event, id) => {
     const personIndex = this.state.persons.findIndex(p => p.id === id);
-    const person  = {...this.state.persons[personIndex]};
+    const person = { ...this.state.persons[personIndex] };
 
     //alternative approach to spread operator;
     //const person  = Object.assign({}, this.state.persons[personIndex]);
 
 
-    person.name=event.target.value;
+    person.name = event.target.value;
     const persons = [...this.state.persons];
     persons[personIndex] = person;
 
@@ -68,22 +69,22 @@ class App extends Component {
   }
 
   togglePersonHandler = () => {
-  const doesShow = this.state.showPersons;
-  this.setState({showPersons: !doesShow})
+    const doesShow = this.state.showPersons;
+    this.setState({ showPersons: !doesShow })
   }
 
   deletePersonHandler = (personIndex) => {
-// const persons = this.state.persons;
-//above is fine but creates a reference and will delete original data and mutable
+    // const persons = this.state.persons;
+    //above is fine but creates a reference and will delete original data and mutable
 
-// const persons = this.state.persons.slice();
-//above is fine which uses slice without argument to copy the array , immutable fation
+    // const persons = this.state.persons.slice();
+    //above is fine which uses slice without argument to copy the array , immutable fation
 
 
-const persons = [...this.state.persons]
-//above does the sma as slice but with a newer syntax called spread(three dot)  operator, t spreads the array and adds to the current array.
-persons.splice(personIndex, 1);
-this.setState({persons: persons})
+    const persons = [...this.state.persons]
+    //above does the sma as slice but with a newer syntax called spread(three dot)  operator, t spreads the array and adds to the current array.
+    persons.splice(personIndex, 1);
+    this.setState({ persons: persons })
   }
 
   render() {
@@ -96,105 +97,110 @@ this.setState({persons: persons})
       padding: '8px',
       cursor: 'pointer',
       textAlign: 'center',
-      ':hover':{
-  backgroundColor : 'lightgreen',
-  color: 'red'
-}
-      
+      ':hover': {
+        backgroundColor: 'lightgreen',
+        color: 'red'
+      }
+
     };
 
 
 
-let persons = null;
+    let persons = null;
+    let btnClass = '';
 
-if(this.state.showPersons){
-  persons = (
+    if (this.state.showPersons) {
+      persons = (
 
-  <div>
-   {this.state.persons.map((person, index) => {
-     return <Person 
+        <div>
+          {this.state.persons.map((person, index) => {
+            return <ErrorBoundary key={person.id}>
+            <Person
 
-     click={()=> this.deletePersonHandler(index)} 
-     name={person.name}
-     age ={person.age}
-     key ={person.id}
-     changed={(event) => this.nameChangeHandler(event, person.id)}
-     />
-   })}
-  </div>
+              click={() => this.deletePersonHandler(index)}
+              name={person.name}
+              age={person.age}
+              // key={person.id}  //this should be here if tehre is no error baoundary mapping
+              changed={(event) => this.nameChangeHandler(event, person.id)}
+            />
+            </ErrorBoundary>
+          })}
+        </div>
 
-  );
-style.backgroundColor = 'red';
-style[':hover'] ={
-backgroundColor : 'salmon',
-color: 'black'
-};
+      );
+      // style.backgroundColor = 'red';
+      // style[':hover'] ={
+      // backgroundColor : 'salmon',
+      // color: 'black'
+      // };
 
-}
-//let classes = ['red', 'bold'].join(' '); //static assignment of classes
+      btnClass = classes.red;
 
-const classes = [];
-if(this.state.persons.length <=2){
-  classes.push('red'); //classes = ['red']
-}
-if(this.state.persons.length <=1){
-  classes.push('bold'); //classes = ['red','bold']
-}
+    }
+    //let classes = ['red', 'bold'].join(' '); //static assignment of classes
+
+    const assignedClasses = [];
+    if (this.state.persons.length <= 2) {
+      assignedClasses.push(classes.red); //classes = ['red']
+    }
+    if (this.state.persons.length <= 1) {
+      assignedClasses.push(classes.bold); //classes = ['boldred','bold']
+    }
 
 
     return (
 
       <StyleRoot>
 
-      <div className="App">
-        <h1>Hi, this is h tag </h1>
-        <p className={classes}>this is p tag</p>
+        <div className={classes.App}>
+          <h1>Hi, this is h tag </h1>
+          <p className={assignedClasses.join(' ')}>this is p tag</p>
 
-        <Person />
-        {/* <StyledButton alt= {this.state.showPersons}
+          <Person />
+          {/* <StyledButton alt= {this.state.showPersons}
           key = '1' //this is required if there are multiple lements using radium
           onClick={this.togglePersonHandler}>Toggle Persons
-          </StyledButton> */}
-          //use styled button if using styled component
+          </StyledButton> */
+            //use styled button if using styled component
+          }
 
-
-        <button className="button"
-          key = '1' //this is required if there are multiple lements using radium
-          onClick={this.togglePersonHandler}>Toggle Persons
+          <button className={btnClass}
+            key='1' //this is required if there are multiple lements using radium
+            onClick={this.togglePersonHandler}>Toggle Persons
           </button>
 
 
-        <button
-          style={style}
-          key = '2' //this is required if there are multiple lements using radium
+          <button
+            style={style}
+            key='2' //this is required if there are multiple lements using radium
 
-          onClick={this.switchNameHandler.bind(this, 'dhdhsd')} >Switch name
+            onClick={this.switchNameHandler.bind(this, 'dhdhsd')} >Switch name
           </button>
 
 
 
-        {persons}
-      {/* we could have used ternary operator, instaed of moving ther persons div out of return, as we cannot use scoped condition here */}
+          {persons}
+          {/* we could have used ternary operator, instaed of moving ther persons div out of return, as we cannot use scoped condition here */}
 
 
 
 
 
 
-        {/* putiing '()' after switchnamehaldler will execute it instatly without click event, like a function call, so avoid it. */}
-        {/* <Person name={this.state.persons[0].name} age={this.state.persons[0].age} click={() => this.switchNameHandler('mamamam!!!!')} /> */}
-        {/* above is an alternative to bind, not recomended over bind */}
-        {/* <Person
+          {/* putiing '()' after switchnamehaldler will execute it instatly without click event, like a function call, so avoid it. */}
+          {/* <Person name={this.state.persons[0].name} age={this.state.persons[0].age} click={() => this.switchNameHandler('mamamam!!!!')} /> */}
+          {/* above is an alternative to bind, not recomended over bind */}
+          {/* <Person
           name={this.state.persons[1].name}
           age={this.state.persons[1].age}
           click={this.switchNameHandler.bind(this, 'guu')}
           changed={this.nameChangeHandler}
         /> */}
-        {/* <Person name="avi2" age="45" click={this.switchNameHandler.bind(this, 'fgt')}>My hobbier: racing</Person> */}
-        {/* self closing tag */}
+          {/* <Person name="avi2" age="45" click={this.switchNameHandler.bind(this, 'fgt')}>My hobbier: racing</Person> */}
+          {/* self closing tag */}
 
-        
-      </div>
+
+        </div>
       </StyleRoot>
 
     );
